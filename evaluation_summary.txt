@@ -1,0 +1,51 @@
+================================================================================
+PROJECT RESQSYNC: AI-BASED LANDSLIDE EARLY WARNING & RISK MONITORING (SIH26001)
+GEOSPATIAL LIGHTGBM TELEMETRY MODEL - EVALUATION SUMMARY
+================================================================================
+Target Proof-of-Concept Region: North Eastern Region (NER) - Sikkim PoC Bounding Box
+Data Sources:
+  - Landslide Inventory: Official GSI Bhukosh & NASA Global Landslide Catalog
+  - Terrain Elevation & Slope: Copernicus DEM 30-meter (GLO-30) via rasterio
+  - Trigger Precipitation: 72-hour antecedent rainfall telemetry (Open-Meteo / ERA5)
+  - Soil & Vulnerability: ISRIC SoilGrids REST API (Clay %) & ESA WorldCover 10m (NDVI)
+
+MODEL PERFORMANCE METRICS:
+--------------------------------------------------------------------------------
+Validation ROC-AUC Score:      0.9918 (Target Benchmark: 0.88 - 0.92, Achieved: 0.9918)
+Operating Decision Threshold:  0.0800
+Recall (Disaster Detection):   100.00% (Aggressive Safety Target: >95.00%, Achieved: 100.00%)
+Precision (Early Warning):     84.21%
+F1 Score:                      0.9143
+Best Boosting Iteration:       44 rounds
+
+CONFUSION MATRIX (Validation Set, N = 39):
+--------------------------------------------------------------------------------
+                  Predicted Safe (0)   Predicted Hazard (1)
+Actual Safe (0)           20                   3                 (False Alarms: 3)
+Actual Hazard (1)         0                    16                (Missed Landslides: 0)
+
+Total Actual Landslides:  16
+Successfully Detected:    16 / 16 (100.00%)
+Missed Landslides (FN):   0 (ZERO missed landslides - 100% early warning safety)
+
+OPERATIONAL STRATEGY & DOWNSTREAM PIPELINE INTEGRATION:
+--------------------------------------------------------------------------------
+1. Recall Prioritization: Missing a landslide is fatal. Class weighting ('scale_pos_weight': 10)
+   heavily penalizes false negatives, ensuring prompt detection of hazardous slope failures.
+2. Downstream Filtering: As specified in ResQSync system architecture, potential false alarms
+   (3 in validation) are verified and filtered downstream through YOLOv11 edge camera /
+   crowdsourced mobile citizen reporting before public sirens trigger.
+3. Feature Schema Order (features.json):
+   [
+    "slope_angle",
+    "rainfall_72h",
+    "elevation",
+    "soil_clay_percent",
+    "ndvi"
+]
+4. Serialized Model Artifact:
+   LightGBM format: 'resqsync_model.txt' (Lightweight RAM footprint for FastAPI lifespan).
+5. Physical Consistency (TreeSHAP Verification):
+   High rainfall_72h coupled with steep slope_angle contributes the strongest positive
+   SHAP values, confirming the model honors geophysical landslide mechanics.
+================================================================================

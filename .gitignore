@@ -1,0 +1,19 @@
+﻿# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large raw raster GeoTIFF (re-downloaded automatically via src/data_acquisition.py)
+data/dem/*.tif
+data/raw/*.csv
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# IDE / OS metadata
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
